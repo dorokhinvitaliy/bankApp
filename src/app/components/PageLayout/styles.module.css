@@ -1,0 +1,52 @@
+.block {
+    border-radius: 2rem;
+    padding: 2rem;
+    background-color: #fff;
+    display: flex;
+    gap: 3rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.block.vertical {
+    flex-direction: column;
+}
+
+.block.purpleFilled {
+    background-color: #7700D8;
+    color: #fff;
+}
+
+.block.blueFilled {
+    background-color: #2558CF;
+    color: #fff;
+}
+
+.block.green {
+    background-color: #159a001a;
+    color: #388e4a;
+}
+
+.block.blueInWhite {
+    background-color: #ffffff;
+    color: #2558CF;
+}
+
+.block.blueInBlue {
+    background-color: #2558cf18;
+    color: #000000;
+}
+
+.group {
+    display: flex;
+    gap: .5rem;
+}
+
+.group.v {
+    flex-direction: column;
+    height: fit-content;
+}
+
+.group.h {
+    flex-direction: row;
+}

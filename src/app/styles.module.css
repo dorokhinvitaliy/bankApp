@@ -1,0 +1,140 @@
+.main {
+    display: grid; 
+    margin: 0 auto;
+    max-width: 900px;
+    grid-template-columns: 1fr 1.3fr; 
+    grid-template-rows: auto; 
+    gap: 16px 16px; 
+    grid-template-areas: 
+      "upload upload"
+      "achievement achievement"
+      "banner banner"
+      "left right"
+      "left right2"
+      "bottom bottom"; 
+  }
+
+  .banner { grid-area: banner; }
+  .left { grid-area: left; }
+  .right { grid-area: right; }
+  .right2 { grid-area: right2; }
+  .bottom {grid-area: bottom;}
+  .upload {grid-area: upload;}
+ /*  .achievement {grid-area: achievement;} */
+/*   .counter {grid-area: counter;} */
+
+  .pBlock {
+    padding: 4rem;
+    font-size: 1.1rem;
+    gap: 2rem;
+  }
+
+  .hBlock {
+    gap: 1rem;
+  }
+
+  .pBlock, .hBlock {
+    transition: all .3s ease;
+    z-index: 0!important;
+  }
+
+  .pBlock:hover, .hBlock:hover {
+    transform: translateY(5px);
+  }
+
+  .banner img {
+    display: none;
+  }
+
+  .banner {
+    width: 100%;
+    gap: 16px;
+  }
+
+  .upload {
+    width: 100%;
+  }
+
+  @media screen and (max-width: 780px) {
+    .banner img {
+        display: block;
+    }
+
+    .banner {
+        flex-direction: column!important;
+    }
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .message {
+    padding: 1rem;
+    background-color: #2857d117;
+    border-radius: .5rem;
+    font-size: .8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .message.red {
+    padding: 1rem;
+    background-color: #f1101017;
+    border-radius: .5rem;
+    font-size: .9rem;
+  }
+  
+  .message.green {
+    padding: 1rem;
+    background-color: #22d11617;
+    color: #388e4a;
+    border-radius: .5rem;
+    font-size: .9rem;
+    grid-area: achievement;
+  }
+
+  .upload {
+    position: relative;
+    overflow: hidden;
+}
+
+.upload:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ffffff40;
+    backdrop-filter: blur(0px);
+    z-index: 11;
+    transition: all .5s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.upload:after {
+    content: "";
+    width: 80px;
+    height: 80px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='%232558CF' class='size-6'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' d='m4.5 12.75 6 6 9-13.5' /%3e%3c/svg%3e");
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 11;
+    transition: all .5s ease;
+    pointer-events: none;
+}
+
+.upload.done:before {
+  opacity: 1;
+  backdrop-filter: blur(30px);
+  pointer-events: all;
+}
+
+.upload.done:after {
+  transform: scale(1) translate(-50%, -50%);
+}

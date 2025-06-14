@@ -1,0 +1,166 @@
+.inputBox {
+    position: relative;
+    min-width: 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background-color: #d9d9d966;
+    border-radius: 1rem;
+    transition: all .3s ease;
+    height: 60px!IMPORTANT;
+    justify-content: center;
+    z-index: 1;
+}
+
+.selectBox_container, .inputBox_container {
+    /* margin-bottom: 1rem; */
+    width: 100%;
+}
+
+.active {
+    box-shadow: inset 0 0 0px 2px #2558CF;
+    background-color: #fff;
+}
+
+
+.inputBoxLabel {
+    user-select: none;
+    display: block;
+    font-size: .7rem;
+    color: darkgray;
+    transition: all .3s ease;
+}
+
+.inputBoxField {
+    height: 24px;
+    margin: 0;
+    display: block;
+    outline: none!important;
+    border: none;
+    background: none;
+    transition: height .3s ease;
+}
+
+.empty:not(.active) .inputBoxField {
+    height: 0;
+}
+
+.empty:not(.active) .inputBoxLabel {
+    font-size: 1rem;
+}
+
+
+.selectBox {
+    cursor: pointer;
+}
+
+.selectBox_options {
+    padding: 0rem;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    background-color: #dadada61;
+    border-radius: 1rem;
+    transition: all .3s ease;
+}
+
+.selectBox.active + .selectBox_options {
+    opacity: 1;
+    margin-top: .5rem;
+}
+
+.selectBox_option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 1rem;
+    overflow-wrap: anywhere;
+    transition: all .3s ease;
+}
+
+.selectBox_option:not(:last-child){
+    margin-bottom: .25rem;
+}
+
+.selectBox_option:not(.selected):hover {
+    background-color: #b3b3b33a;
+}
+
+
+.selected {
+    background-color: #2558cf1e;
+    color: #2558CF;
+}
+
+.optionIcon {
+    color: #2558CF;
+    transform: translateX(1rem) scale(0);
+    transition: all .3s ease;
+}
+
+.selected .optionIcon {
+    transform: translateX(0) scale(1);
+}
+
+.inputBox:not(.active):hover {
+    background-color: #d9d9d994;
+}
+
+.inputBoxIcon {
+    opacity: .6;
+    display: block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 1.2rem;
+    transition: all .3s ease;
+}
+
+.warn {
+    animation: appearing .3s ease;
+    opacity: .9;
+}
+
+@keyframes appearing {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1) translateY(-50%);
+    }
+}
+
+.selectBox.active > .inputBoxIcon {
+    transform: rotate(180deg) translateY(50%);
+}
+
+.selectBox.empty .inputBoxField {
+    height: 0;
+}
+
+.selectBox.empty .inputBoxLabel {
+    font-size: 1rem;
+}
+
+.inputBox_tip {
+    overflow: hidden;
+    height: 0;
+
+    font-size: .7rem;
+    color: #767676;
+    transition: all .3s ease;
+}
+
+.inputBox_tip div {
+    padding: 1rem;
+}
+
+.inputBox_container.tipActive {
+    background: #80808024;
+    border-radius: 1rem;
+}

@@ -1,0 +1,203 @@
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 3rem;
+  color: #222;
+  background: #fafafa;
+  border-radius: 2rem;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+
+.selectBox,
+.inputField {
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.errorMsg {
+  color: #c0392b;
+  margin-bottom: 24px;
+  font-weight: 600;
+  text-align: center;
+}
+
+
+.plotContainer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.plotImage {
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.container {
+  position: relative;
+  overflow: hidden;
+}
+
+.container.loading:before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(5px);
+  z-index: 10;
+  border-radius: 2rem;
+}
+
+.container.loading:after {
+  content: "";
+  display: block;
+  position: absolute;
+  bottom: 400px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 14;
+  margin: 8px auto 0;
+  width: 50px;
+  height: 50px;
+  border: 6px solid #ddd;
+  border-top-color: #2d89ef;
+  border-radius: 50%;
+  animation: spin .5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+
+
+
+/* Стилизация контейнера */
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+/* Скрываем оригинальный чекбокс */
+.checkboxLabel input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Кастомный чекбокс */
+.checkboxCustom {
+  content: "";
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  margin-right: 12px;
+  transition: all 0.2s ease-in-out;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Стили при наведении */
+.checkboxLabel:hover .checkboxCustom {
+  border-color: #888;
+}
+
+/* Стили активного состояния */
+.checkboxLabel input[type="checkbox"]:checked~.checkboxCustom {
+  background-color: #3B82F6;
+  /* синий цвет при выборе */
+  border-color: #3B82F6;
+}
+
+/* Иконка галочки */
+.checkboxCustom::after {
+  content: "";
+  display: none;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}
+
+/* Отображаем галочку при checked */
+.checkboxLabel input[type="checkbox"]:checked~.checkboxCustom::after {
+  display: block;
+}
+
+.filters {
+  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.targetSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filterSection {
+  display: flex;
+  gap: 1rem;
+}
+
+.message {
+  padding: 1rem;
+  background-color: #2857d117;
+  border-radius: .5rem;
+  font-size: .8rem;
+}
+
+.message.red {
+  padding: 1rem;
+  background-color: #f1101017;
+  border-radius: .5rem;
+  font-size: .9rem;
+}
+
+.message.green {
+  padding: 1rem;
+  background-color: #22d11617;
+  border-radius: .5rem;
+  font-size: .9rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.formGroup > label {
+  display: none
+}

@@ -1,0 +1,110 @@
+.header {
+    display: flex;
+    background-color: #ffffffc7;
+    color: rgb(0, 0, 0);
+    justify-content: space-between;
+    
+    border-radius: 0rem;
+    align-items: center;
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0px;
+    padding: 0 1rem;
+    z-index: 2;
+}
+
+.header.scrolled {
+    border-radius: 1rem;
+    top: 10px;
+}
+
+.header:before {
+/*     content: ""; */
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, #7a00dd, #2658d7);
+    z-index: -1;
+    opacity: .05;
+    border-radius: 0rem;
+}
+
+.headerLogo {
+    padding: 1rem;
+}
+
+.headerLink {
+    display: flex;
+    gap: .5rem;
+    color: #2658d7;
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    transition: all ease-in-out .3s;
+}
+
+.active {
+    font-weight: bold;
+}
+
+.headerLink:hover {
+    background-color: #2658d714;
+}
+
+
+.headerLink > svg {
+    display: none;
+    transition: all .5s ease;
+}
+
+.headerLink:hover > svg {
+    animation: pulsing 1s ease infinite;
+}
+
+@keyframes pulsing {
+    0% {
+        transform: translateY(0px);
+    }
+
+    30% {
+        transform: translateY(-2px);
+    }
+
+    50% {
+        transform: translateY(3px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.headerLink > svg {
+    opacity: .8;
+}
+
+
+.group {
+    display: flex;
+}
+
+@media screen and (max-width: 800px){
+    .headerLink > svg {
+        display: block;
+    }
+
+
+    .headerLink > div {
+        display: none;
+        padding: 0;
+        gap: 0;
+    }
+
+    .headerLink {
+        padding: 1rem;
+    }
+
+    
+}
