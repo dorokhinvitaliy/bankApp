@@ -137,3 +137,24 @@
 .upload.done:after {
   transform: scale(1) translate(-50%, -50%);
 }
+
+.upload.focused {
+  animation: pulse 1s ease infinite;
+}
+@keyframes pulse {
+  0% {
+      box-shadow: 0;
+  }
+  20% {
+      box-shadow: 0 0 0 5px #2658cf;
+  }
+  40% {
+      box-shadow: 0;
+  }
+  60% {
+      box-shadow: 0 0 0 3px #2658cf;
+  }
+  80% {
+      box-shadow: 0;
+  }
+}

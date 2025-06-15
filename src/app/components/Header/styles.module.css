@@ -10,7 +10,7 @@
     position: sticky;
     top: 0px;
     padding: 0 1rem;
-    z-index: 2;
+    z-index: 20;
 }
 
 .header.scrolled {
@@ -60,7 +60,7 @@
 
 
 .headerLink > svg {
-    display: none;
+/*     display: none; */
     transition: all .5s ease;
 }
 
@@ -87,7 +87,7 @@
 }
 
 .headerLink > svg {
-    opacity: .8;
+/*     opacity: .8; */
 }
 
 

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./components/Header";
 import Block, { HGroup, VGroup } from "./components/PageLayout/Block";
 
@@ -41,6 +41,23 @@ export default function Home() {
   };
 
   const [resultBlock, resultBlockUpd] = useState(false);
+  const blockRef = useRef(null);
+  const uploadRef = useRef(null);
+
+  const [blockFocused, changeBlockFocused] = useState(false);
+  const triggerUpload = () => {
+    changeBlockFocused(true);
+    setTimeout(()=>{
+      changeBlockFocused(false);
+    }, 3000);
+  };
+
+  const scrollToVisible = (ref) => {
+    const scr = ref.current;
+    if(scr){
+      scr.scrollIntoView({behavior: "smooth"});
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +82,7 @@ export default function Home() {
   };
   return (
     <main className={styles.main} style={{ padding: "1rem" }}>
-      <Block gap={"5rem"} className={classNames(styles.upload, {[styles.done]: resultBlock})} style={{ justifyContent: "start" }}>
+      <Block ref={uploadRef} gap={"5rem"} className={classNames(styles.upload, {[styles.done]: resultBlock}, {[styles.focused]: blockFocused})} style={{ justifyContent: "start" }}>
         <ArrowUpTrayIcon className="w-30 h-30" style={{ color: "#2558CF" }} />
         <VGroup style={{ gap: "1rem" }}>
           <p className={styles.title}>Загрузите файл для анализа прямо сейчас</p>
@@ -78,7 +95,7 @@ export default function Home() {
             status={status}
             helperText={selectedFile === null ? "Загрузите PDF или CSV, до 5MB" : validateFile(selectedFile) ? validateFile(selectedFile) : null}
           />
-          <div className="flex gap-5"><Button onClick={(e) => handleSubmit(e)}>Отправить файлы</Button><Button secondary onClick={(e) => handleFileChange(null)}>Очистить файлы</Button></div>
+          <div className="flex gap-5"><Button onClick={(e) => handleSubmit(e)}>Отправить файлы</Button><Button secondary onClick={(e) => setSelectedFile(undefined)}>Очистить файлы</Button></div>
         </VGroup>
       </Block>
       
@@ -88,7 +105,7 @@ export default function Home() {
           <VGroup style={{ gap: 16 }}>
             <p style={{ color: "#2558CF" }}>Быстрое начало</p>
             <p>BanKer - лучший способ для анализа ваших клиентов.</p>
-            <HGroup><Button>Начать</Button><Button secondary>Подробнее</Button></HGroup>
+            <HGroup><Button onClick={(e)=>{scrollToVisible(uploadRef); triggerUpload()}}>Начать</Button><Button onClick={(e)=>{scrollToVisible(blockRef)}} secondary>Подробнее</Button></HGroup>
           </VGroup>
         </Block>
 
@@ -96,7 +113,7 @@ export default function Home() {
           <p style={{ color: "#2558CF" }}>Если коротко...</p>
           <p style={{ color: "#000" }}>Мы проанализировали уже</p>
           <div className="flex flex-row" style={{ alignItems: "end" }}>
-            <p style={{ color: "#2558CF", fontSize: "4rem" }}>1,500</p>
+            <p style={{ color: "#2558CF", fontSize: "4rem" }}>45,000</p>
             <p style={{ color: "#000", width: "100%", textAlign: "right" }}>записей</p>
           </div>
         </Block>
@@ -111,14 +128,14 @@ export default function Home() {
         <Image alt={"struct"} width={120} height={120} src={"/pie.svg"}></Image>
         <p>Формирование аналитических отчетов по клиентам </p>
       </Block>
-      <Block theme={"blueInWhite"} className={classNames(styles.right2, styles.hBlock)}>
+      <Block ref={blockRef} theme={"blueInWhite"} className={classNames(styles.right2, styles.hBlock)}>
         <Image alt={"struct"} width={100} height={100} src={"/analytics.svg"}></Image>
         <p>Обработка и визуализация данных о клиентах</p>
       </Block>
 
       <Block theme={"blueInBlue"} className={classNames(styles.bottom, styles.hBlock)} style={{ gap: "3rem", justifyContent: "space-between" }}>
         <Image alt={"struct"} width={140} height={140} src={"/loop.svg"}></Image>
-        <p>Проведение тщательного статистического анализа базы данных клиентов</p>
+        <p>Выявление закономерностей и прогнозирование клиентского поведения. </p>
       </Block>
 
 
