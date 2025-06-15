@@ -81,7 +81,7 @@ export default function Home() {
           <div className="flex gap-5"><Button onClick={(e) => handleSubmit(e)}>Отправить файлы</Button><Button secondary onClick={(e) => handleFileChange(null)}>Очистить файлы</Button></div>
         </VGroup>
       </Block>
-      {resultBlock && <div className={classNames(styles.message, styles.green)}><CheckIcon className="w-8 h-8"/> Вы успешно загрузили файлы!</div>}
+      
       <HGroup className={styles.banner}>
         <Block>
           <Image alt={"arrow"} width={120} height={120} src={"/arrow-icon.svg"}></Image>
