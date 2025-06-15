@@ -21,6 +21,21 @@ df_raw: pd.DataFrame = None  # Исходные данные
 df_processed: pd.DataFrame = None  # Обработанные данные
 model: LinearRegression = None
 
+
+def clean_raw_data(df: pd.DataFrame) -> pd.DataFrame:
+    df_clean = df.copy()
+    
+    df_clean = df_clean.drop(['contact', 'poutcome'], axis=1, errors='ignore')
+    
+    df_clean = df_clean[df_clean.get('education', '') != 'unknown']
+    
+    if 'job' in df_clean.columns:
+        valid_jobs = df_clean[df_clean['job'] != 'unknown']['job']
+        replacement = valid_jobs.mode()[0] if not valid_jobs.empty else 'unemployed'
+        df_clean['job'] = df_clean['job'].replace('unknown', replacement)
+    
+    return df_clean
+
 # === Подготовка данных ===
 def prepare_data(df_raw: pd.DataFrame) -> pd.DataFrame:
     df = df_raw.copy()
@@ -29,23 +44,19 @@ def prepare_data(df_raw: pd.DataFrame) -> pd.DataFrame:
     df["y"] = df["y"].map({'yes': 1, 'no': 0})
 
     # Категоризация занятости
-    df['is_employed'] = df['job'].apply(lambda x: 0 if x in ['unemployed', 'unknown', 'retired', 'student'] else 1)
+    df['is_employed'] = df['job'].apply(lambda x: 0 if x in ['unemployed', 'retired', 'student'] else 1)
     df = df.drop('job', axis=1)
 
     # marital числовые
     df["marital"] = df["marital"].replace({'single': 0, 'married': 1, 'divorced': 2})
 
-    # education числовые + удаление unknown
-    df = df[df['education'] != 'unknown']
+    # education числовые
     df["education"] = df["education"].replace({'primary': 0, 'secondary': 1, 'tertiary': 2})
 
     # default, housing, loan  числовые
     df["default"] = df["default"].replace({'yes': 1, 'no': 0})
     df["housing"] = df["housing"].replace({'yes': 1, 'no': 0})
     df["loan"] = df["loan"].replace({'yes': 1, 'no': 0})
-
-    # убираем contact
-    df = df.drop(['contact'], axis=1)
 
     # month переводим в числа
     month_mapping = {
@@ -55,9 +66,6 @@ def prepare_data(df_raw: pd.DataFrame) -> pd.DataFrame:
     }
     df['month_int'] = df['month'].map(month_mapping)
     df = df.drop(['month'], axis=1)
-
-    # poutcome убираем
-    df = df.drop(['poutcome'], axis=1)
 
     return df
 
@@ -76,6 +84,7 @@ def train_model(df: pd.DataFrame) -> LinearRegression:
 
     return model
 
+
 # === Эндпоинты ===
 
 @app.route('/upload', methods=['POST'])
@@ -87,14 +96,22 @@ def upload():
     file = request.files['file']
 
     try:
-        df_raw = pd.read_csv(file, sep=';')
+        # Чтение исходных данных
+        raw = pd.read_csv(file, sep=';')
+        
+        # Очистка исходных данных
+        df_raw = clean_raw_data(raw)
+        
+        # Подготовка обработанных данных
+        df_processed = prepare_data(df_raw)
+        model = train_model(df_processed)
+
     except Exception as e:
+        import traceback
         abort(400, description=f'Не удалось прочитать CSV: {e}')
 
-    df_processed = prepare_data(df_raw)
-    model = train_model(df_processed)
-
     return jsonify({'status': 'ok', 'rows': len(df_processed)})
+
 
 @app.route('/columns', methods=['GET'])
 def get_columns():
@@ -148,8 +165,8 @@ def plot():
         if sub.empty:
             abort(400, description='Фильтр дал пустую выборку')
 
-        plt.figure(figsize=(12, 8), dpi=200)
-        sns.histplot(sub[tc], bins=20, kde = True, color = '#0095b6', alpha = 0.8, edgecolor = 'w') # САМ ГРАФИК
+        plt.figure(figsize=(12, 8), dpi=300)
+        sns.histplot(sub[tc], bins=20, kde = True, color = '#3300FF', alpha = 0.8, edgecolor = 'w') # САМ ГРАФИК
         plt.title(f'Распределение "{tc}"\nФильтры: {f1c}={f1v}, {f2c}={f2v}', fontsize=12)
         plt.xlabel(tc, fontsize=10)
         plt.ylabel('Частота', fontsize=10)
@@ -202,7 +219,8 @@ def generate_report():
         if sub.empty:
             abort(400, description='Фильтр дал пустую выборку')
 
-        sns.histplot(sub[tc], bins=20, kde = True, color = '#0095b6', alpha = 0.8, edgecolor = 'w') # САМ ГРАФИК
+        plt.figure(figsize=(12, 8), dpi=300)
+        sns.histplot(sub[tc], bins=20, kde = True, color = '#3300FF', alpha = 0.8, edgecolor = 'w') # САМ ГРАФИК
 
         plt.title(f'Распределение "{tc}"\nФильтры: {f1c}={f1v}, {f2c}={f2v}', fontsize=12)
         plt.xlabel(tc, fontsize=10)
@@ -237,14 +255,19 @@ def generate_report():
 
 @app.route('/table', methods=['GET'])
 def table():
-    if df_raw is None:
+    """Возвращает обработанные данные для отображения в таблице"""
+    global df_processed  # Используем обработанные данные
+    
+    if df_processed is None:
         abort(400, description='Данные не загружены. Сначала POST /upload')
-    return jsonify(df_raw.head(100).to_dict(orient='records'))
+    
+    # Возвращаем первые 100 строк обработанных данных
+    return jsonify(df_processed.head(100).to_dict(orient='records'))
 
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    global model, df
+    global model, df_processed
     if model is None:
         abort(400, description='Модель не обучена. Сначала POST /upload')
 
