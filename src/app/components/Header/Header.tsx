@@ -16,7 +16,7 @@ export default function Header(){
     }
 
     function HeaderLogo(){
-        return <Link className={classNames(styles.headerLogo)} href="/analysis"><Image alt="root" width={100} height={100} src="/logo-giant.png"></Image></Link>;
+        return <Link className={classNames(styles.headerLogo)} href="/"><Image alt="root" width={100} height={100} src="/logo-giant.png"></Image></Link>;
     }
 
     function Group({children}:{children: React.ReactNode}){

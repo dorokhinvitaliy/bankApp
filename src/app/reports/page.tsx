@@ -21,37 +21,16 @@ const headersMap: Record<string, string> = {
   campaign: "Кампания",
   pdays: "Pdays",
   previous: "Предыдущие контакты",
-  is_employed: "Работает",
-  month_int: "Месяц",
+  job: "Работает",
+  month: "Месяц",
   y: "Подписка на депозит",
 };
 
 const decodeValue = (key: string, val: any): string | number => {
-  if (key === "marital") {
-    return { 0: "Холост", 1: "Женат", 2: "Разведён" }[val] ?? val;
+  if (["marital", "job", "education", "housing", "loan", "default", "y", "month"].includes(key)) {
+    return getOptionsForColumn(key).find((el) => el.id == val).text ?? val;
   }
-  if (key === "education") {
-    return { 0: "Начальное", 1: "Среднее", 2: "Высшее" }[val] ?? val;
-  }
-  if (["housing", "loan", "default", "is_employed", "y"].includes(key)) {
-    return val === 1 ? "Да" : "Нет";
-  }
-  if (key === "month_int") {
-    return {
-      1: "Январь",
-      2: "Февраль",
-      3: "Март",
-      4: "Апрель",
-      5: "Май",
-      6: "Июнь",
-      7: "Июль",
-      8: "Август",
-      9: "Сентябрь",
-      10: "Октябрь",
-      11: "Ноябрь",
-      12: "Декабрь",
-    }[val] ?? val;
-  }
+  
   return val;
 };
 
@@ -60,28 +39,45 @@ const decodeValue = (key: string, val: any): string | number => {
 const getOptionsForColumn = (col: string) => {
   if (col === "marital") {
     return [
-      { id: "0", text: "Холост" },
-      { id: "1", text: "Женат" },
-      { id: "2", text: "Разведён" },
+      { id: "single", text: "Холост" },
+      { id: "married", text: "Женат" },
+      { id: "divorced", text: "Разведён" },
     ];
   }
   if (col === "education") {
     return [
-      { id: "0", text: "Начальное" },
-      { id: "1", text: "Среднее" },
-      { id: "2", text: "Высшее" },
+      { id: "primary", text: "Начальное" },
+      { id: "secondary", text: "Среднее" },
+      { id: "tertiary", text: "Высшее" },
+    ];
+  }
+  if (col === "job") {
+    return [
+      { id: "management", text: "Менеджмент" },
+      { id: "technician", text: "Техник" },
+      { id: "entrepreneur", text: "Предприниматель" },
+      { id: "blue-collar", text: "Рабочий класс" },
+      { id: "retired", text: "На пенсии" },
+      { id: "admin", text: "Администратор" },
+      { id: "services", text: "Услуги или сервис" },
+      { id: "self-employed", text: "Самозанятый" },
+      { id: "unemployed", text: "Неработающий" },
+      { id: "housemaid", text: "Горничная" },
+      { id: "student", text: "Студент" },
+      { id: "unknown", text: "Неизвестен" },
+
     ];
   }
   if (["housing", "loan", "default", "is_employed", "y"].includes(col)) {
     return [
-      { id: "1", text: "Да" },
-      { id: "0", text: "Нет" },
+      { id: "yes", text: "Да" },
+      { id: "no", text: "Нет" },
     ];
   }
-  if (col === "month_int") {
+  if (col === "month") {
     return Array.from({ length: 12 }, (_, i) => ({
-      id: String(i + 1),
-      text: decodeValue("month_int", i + 1),
+      id: ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"][i],
+      text: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"][i],
     }));
   }
 
@@ -89,7 +85,7 @@ const getOptionsForColumn = (col: string) => {
 };
 
 // Поля с бинарными значениями ("Да"/"Нет")
-const binaryFields = ["housing", "loan", "default", "is_employed", "y"];
+const binaryFields = ["housing", "loan", "default", "y"];
 
 // Числовые поля
 const numericFields = new Set([
@@ -161,17 +157,17 @@ export default function Page() {
   const handleFilterChange = (col: string, value: string) => {
     let finalValue = value;
     let rawValue: string | number = value;
-  
+
     if (isBinaryField(col)) {
       // Для Да/Нет: сохраняем число, отображаем текст
-      rawValue = parseInt(value, 10);
+      rawValue = value;
       finalValue = decodeValue(col, rawValue);
     } else {
       // Для marital, education и т.д.: сохраняем текст, rawValue — id как строка
       rawValue = value; // например, "0", "1"
       finalValue = decodeValue(col, value); // например, "Холост", "Женат"
     }
-  
+
     setFilters({
       ...filters,
       [col]: { ...filters[col], value: finalValue, rawValue },
@@ -248,6 +244,26 @@ export default function Page() {
       .finally(() => setFetching(false));
   };
 
+  // === Скачивание PDF-отчёта ===
+  const downloadPdfReport = () => {
+    const activeFilters = Object.entries(filters).filter(
+      ([_, f]) => f.enabled && f.value.trim() !== ""
+    );
+
+    if (activeFilters.length < 2 || !targetCol) return;
+
+    const [f1, f2] = activeFilters;
+    const url = new URL(`${API_BASE}/report`);
+    url.searchParams.append("filter1_col", f1[0]);
+    url.searchParams.append("filter1_val", String(f1[1].rawValue));
+    url.searchParams.append("filter2_col", f2[0]);
+    url.searchParams.append("filter2_val", String(f2[1].rawValue));
+    url.searchParams.append("target_col", targetCol.id);
+
+    // Открытие нового окна или прямая загрузка
+    window.open(url.toString(), '_blank');
+  };
+
   // Рассчитываем количество активных фильтров
   const activeFilterCount = Object.values(filters).filter((f) => f.enabled).length;
 
@@ -260,7 +276,7 @@ export default function Page() {
     targetCol !== null;
 
   return (
-    <div className={classNames(styles.container, {[styles.loading]: fetching})}>
+    <div className={classNames(styles.container, { [styles.loading]: fetching })}>
       <h1 className="text-2xl font-bold mb-4">Генерация отчёта</h1>
       <div className={styles.message}>Выберите 2 фильтра с значениями для них, затем одну целевую переменную для создания отчета.</div>
 
@@ -300,17 +316,29 @@ export default function Page() {
         />
       </div>
 
-      {/* Кнопка с disabled */}
-      <Button onClick={generateReport} disabled={!canGenerate || fetching}>
-        {fetching ? "Загрузка..." : "Создать отчет"}
-      </Button>
+      <div style={{ width: "100%", display: "flex", gap: ".5rem" }}>
+        <Button onClick={generateReport} disabled={!canGenerate || fetching}>
+          {fetching ? "Загрузка..." : "Создать отчет"}
+        </Button>
 
-      {error!="" && <div className={classNames(styles.message, styles.red)}>{error}</div>}
+        {canGenerate && (
+          <Button
+            secondary
+            onClick={downloadPdfReport}
+            disabled={fetching}
+            type="button"
+          >
+            {fetching ? "Загрузка..." : "Скачать отчёт (PDF)"}
+          </Button>
+        )}
+      </div>
+
+      {error != "" && <div className={classNames(styles.message, styles.red)}>{error}</div>}
 
       {/* Отображение графика */}
       {imageSrc && (
         <div className={styles.chart}>
-          <h2>График</h2>
+          <h2 className="text-xl font-bold mb-4">График</h2>
           <img src={imageSrc} alt="Результат анализа" />
         </div>
       )}
