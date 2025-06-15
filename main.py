@@ -17,7 +17,8 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
 # === Глобальные переменные ===
-df: pd.DataFrame = None
+df_raw: pd.DataFrame = None  # Исходные данные
+df_processed: pd.DataFrame = None  # Обработанные данные
 model: LinearRegression = None
 
 # === Подготовка данных ===
@@ -79,7 +80,7 @@ def train_model(df: pd.DataFrame) -> LinearRegression:
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    global df, model
+    global df_raw, df_processed, model
 
     if 'file' not in request.files:
         abort(400, description='Нет файла в запросе')
@@ -90,19 +91,18 @@ def upload():
     except Exception as e:
         abort(400, description=f'Не удалось прочитать CSV: {e}')
 
-    df = prepare_data(df_raw)
-    model = train_model(df)
+    df_processed = prepare_data(df_raw)
+    model = train_model(df_processed)
 
-    return jsonify({'status': 'ok', 'rows': len(df)})
-
+    return jsonify({'status': 'ok', 'rows': len(df_processed)})
 
 @app.route('/columns', methods=['GET'])
 def get_columns():
     """Возвращает список всех доступных колонок"""
-    if df is None:
+    if df_raw is None:
         abort(400, description='Данные не загружены. Сначала POST /upload')
 
-    columns = list(df.columns)
+    columns = list(df_raw.columns)
     return jsonify({"columns": columns})
 
 
@@ -110,18 +110,19 @@ def get_columns():
 def get_column_values():
     """Возвращает все уникальные значения для указанной колонки"""
     col = request.args.get("col")
-    if not col or col not in df.columns:
+    if not col or col not in df_raw.columns:
         abort(400, description="Колонка не указана или не существует")
 
-    unique_values = df[col].unique().tolist()
+    unique_values = df_raw[col].unique().tolist()
     return jsonify({"values": unique_values})
 
 
 @app.route('/plot', methods=['GET'])
 def plot():
     """Генерирует гистограмму по двум фильтрам и целевой переменной"""
-    global df
-    if df is None:
+    global df_raw
+
+    if df_raw is None:
         abort(400, description='Данные не загружены. Сначала POST /upload')
 
     args = request.args
@@ -137,22 +138,12 @@ def plot():
     f2v = args['filter2_val']
     tc = args['target_col']
 
-    if any(col not in df.columns for col in [f1c, f2c, tc]):
+    if any(col not in df_raw.columns for col in [f1c, f2c, tc]):
         abort(400, description='Указаны недопустимые колонки')
 
     try:
-        # Приведение типов
-        if pd.api.types.is_numeric_dtype(df[f1c]):
-            f1v = float(f1v)
-        else:
-            f1v = str(f1v)
-
-        if pd.api.types.is_numeric_dtype(df[f2c]):
-            f2v = float(f2v)
-        else:
-            f2v = str(f2v)
-
-        sub = df[(df[f1c] == f1v) & (df[f2c] == f2v)]
+        sub = df_raw[(df_raw[f1c].astype(str) == f1v) & 
+                     (df_raw[f2c].astype(str) == f2v)]
 
         if sub.empty:
             abort(400, description='Фильтр дал пустую выборку')
@@ -182,8 +173,9 @@ def plot():
 @app.route('/report', methods=['GET'])
 def generate_report():
     """Генерирует PDF-отчет с гистограммой по двум фильтрам"""
-    global df
-    if df is None:
+    global df_raw
+
+    if df_raw is None:
         abort(400, description='Данные не загружены. Сначала POST /upload')
 
     args = request.args
@@ -199,22 +191,13 @@ def generate_report():
     f2v = args['filter2_val']
     tc = args['target_col']
 
-    if any(col not in df.columns for col in [f1c, f2c, tc]):
+    if any(col not in df_raw.columns for col in [f1c, f2c, tc]):
         abort(400, description='Указаны недопустимые колонки')
 
     try:
-        # Приведение типов (как в /plot)
-        if pd.api.types.is_numeric_dtype(df[f1c]):
-            f1v = float(f1v)
-        else:
-            f1v = str(f1v)
-
-        if pd.api.types.is_numeric_dtype(df[f2c]):
-            f2v = float(f2v)
-        else:
-            f2v = str(f2v)
-
-        sub = df[(df[f1c] == f1v) & (df[f2c] == f2v)]
+        sub = df_raw[
+            (df_raw[f1c].astype(str) == str(f1v)) & 
+            (df_raw[f2c].astype(str) == str(f2v))]
 
         if sub.empty:
             abort(400, description='Фильтр дал пустую выборку')
@@ -254,10 +237,9 @@ def generate_report():
 
 @app.route('/table', methods=['GET'])
 def table():
-    global df
-    if df is None:
+    if df_raw is None:
         abort(400, description='Данные не загружены. Сначала POST /upload')
-    return jsonify(df.head(100).to_dict(orient='records'))
+    return jsonify(df_raw.head(100).to_dict(orient='records'))
 
 
 @app.route('/predict', methods=['POST'])
